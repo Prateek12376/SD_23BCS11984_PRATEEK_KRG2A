@@ -1,0 +1,463 @@
+<mxfile host="app.diagrams.net" agent="Claude AI" version="29.3.1">
+  <diagram name="HLD - Current Architecture" id="HLD_Current">
+    <mxGraphModel dx="1800" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1800" pageHeight="2400" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- TITLE -->
+        <mxCell id="title1" value="AMAZON CLONE — HIGH LEVEL DESIGN (Current Architecture)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="30" width="700" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle1" value="Tech Stack: React.js | Node.js + Express | PostgreSQL | ElasticSearch | Redis Cache | AWS S3" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="350" y="70" width="800" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- CLIENTS -->
+        <mxCell id="client_box" value="Clients" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="140" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="client1" value="Web Browser" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;align=center;aspect=fixed;imageAspect=0;image=img/lib/clip_art/computers/IBM_Tablet_128x128.png;" vertex="1" parent="1">
+          <mxGeometry x="30" y="200" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="client2" value="Mobile App" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;align=center;aspect=fixed;imageAspect=0;image=img/lib/clip_art/telecommunication/iPhone_128x128.png;" vertex="1" parent="1">
+          <mxGeometry x="110" y="200" width="50" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- RATE LIMITER -->
+        <mxCell id="ratelimiter" value="Rate Limiter&#xa;(express-rate-limit)&#xa;&#xa;• 100 req / 15 min (general)&#xa;• 5 orders / min (orders)&#xa;• POST/PUT/DELETE on cart" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="220" y="180" width="220" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- ARROW client to rate limiter -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="client1" target="ratelimiter" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="client2" target="ratelimiter" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- API GATEWAY / EXPRESS SERVER -->
+        <mxCell id="apigateway" value="API Gateway&#xa;(Express.js — server.js)&#xa;&#xa;• Routing&#xa;• CORS&#xa;• Rate Limiting Middleware&#xa;• Error Handler&#xa;Port: 5000" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="510" y="160" width="220" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="ratelimiter" target="apigateway" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- MICROSERVICES LAYER -->
+        <mxCell id="ms_title" value="Microservices Layer" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="800" y="130" width="200" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Product Service -->
+        <mxCell id="prod_svc" value="Product Service&#xa;(productController.js)&#xa;&#xa;• GET /api/products&#xa;• GET /api/products/:id&#xa;• GET /api/products/categories&#xa;• Pagination (LIMIT/OFFSET)&#xa;• In-memory Cache (node-cache)&#xa;  TTL: 5 min, key: query params" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="790" y="160" width="240" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="apigateway" target="prod_svc" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Cart Service -->
+        <mxCell id="cart_svc" value="Cart Service&#xa;(cartController.js)&#xa;&#xa;• GET /api/cart/:session_id&#xa;• POST /api/cart (cartLimiter)&#xa;• PUT /api/cart/:id (cartLimiter)&#xa;• DELETE /api/cart/:id (cartLimiter)&#xa;• DELETE /api/cart/clear/:session_id&#xa;• UPSERT on conflict (session+product)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="790" y="360" width="240" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="apigateway" target="cart_svc" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Order Service -->
+        <mxCell id="order_svc" value="Order Service&#xa;(orderController.js)&#xa;&#xa;• POST /api/orders (orderLimiter)&#xa;• GET /api/orders/:id&#xa;• DB Transaction: BEGIN → COMMIT&#xa;  → ROLLBACK on failure&#xa;• Decrements product stock&#xa;• Clears cart after order" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="790" y="570" width="240" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="apigateway" target="order_svc" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- FRONTEND -->
+        <mxCell id="frontend" value="React Frontend&#xa;(Port: 3000)&#xa;&#xa;• CartContext (session_id via UUID)&#xa;• React Router v6&#xa;• Axios API layer (api/api.js)&#xa;• Inline styles (Amazon theme)&#xa;• Pagination with page numbers&#xa;Pages: Home, ProductDetail,&#xa;Cart, Checkout, OrderConfirmation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="50" y="390" width="240" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="frontend" target="ratelimiter" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- DATABASE LAYER -->
+        <mxCell id="db_title" value="PostgreSQL Database Layer" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1110" y="130" width="280" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Products DB -->
+        <mxCell id="prod_db" value="products table&#xa;(PostgreSQL)&#xa;&#xa;id, name, description,&#xa;price, stock, category_id,&#xa;images TEXT[], rating,&#xa;review_count, specifications JSONB" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1110" y="160" width="180" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="prod_svc" target="prod_db" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Cart DB -->
+        <mxCell id="cart_db" value="cart table&#xa;(PostgreSQL)&#xa;&#xa;id, session_id VARCHAR,&#xa;product_id (FK→products),&#xa;quantity INT&#xa;UNIQUE(session_id, product_id)" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1110" y="360" width="180" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="cart_svc" target="cart_db" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Orders DB -->
+        <mxCell id="order_db" value="orders + order_items&#xa;(PostgreSQL)&#xa;&#xa;orders: id UUID, session_id,&#xa;full_name, address, city,&#xa;state, zip, phone,&#xa;subtotal, total, status&#xa;&#xa;order_items: order_id, product_id,&#xa;quantity, price" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1110" y="570" width="180" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="order_svc" target="order_db" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Categories DB -->
+        <mxCell id="cat_db" value="categories table&#xa;(PostgreSQL)&#xa;&#xa;id, name, created_at&#xa;(5 categories seeded)" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1110" y="790" width="180" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="prod_svc" target="cat_db" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- In-Memory Cache -->
+        <mxCell id="cache_box" value="In-Memory Cache&#xa;(node-cache)&#xa;&#xa;Key: products_{search}_{cat}_{page}_{limit}&#xa;TTL: 300 seconds (5 min)&#xa;Cache HIT → skip DB query&#xa;Cache MISS → query DB, set cache" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="790" y="780" width="240" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="prod_svc" target="cache_box" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- AWS S3 note -->
+        <mxCell id="s3_box" value="AWS S3 (Product Images)&#xa;images stored as URLs in&#xa;products.images TEXT[]&#xa;(Unsplash URLs in seed data)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1110" y="910" width="200" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="prod_db" target="s3_box" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- DEPLOYMENT -->
+        <mxCell id="deploy_box" value="DEPLOYMENT&#xa;&#xa;Frontend → Vercel&#xa;  (REACT_APP_API_URL = backend URL)&#xa;&#xa;Backend → Render.com&#xa;  (app.set trust proxy 1)&#xa;  (DATABASE_URL env var)&#xa;&#xa;Database → Render PostgreSQL&#xa;  (SSL: rejectUnauthorized: false)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#666666;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="50" y="660" width="240" height="200" as="geometry" />
+        </mxCell>
+
+        <!-- LEGEND / DATA FLOW -->
+        <mxCell id="flow_title" value="DATA FLOW (Add to Cart Example)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="890" width="320" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_steps" value="1. User clicks Add to Cart (React)&#xa;2. CartContext.addItem() → POST /api/cart&#xa;3. Rate Limiter checks: cartLimiter (POST)&#xa;4. Express routes to cartController.addToCart()&#xa;5. UPSERT into cart table (session_id + product_id)&#xa;6. Returns updated cart item&#xa;7. fetchCart() re-fetches cart for UI update" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="50" y="920" width="340" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- TRANSACTION FLOW -->
+        <mxCell id="tx_title" value="ORDER TRANSACTION (DB Level)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="440" y="890" width="280" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tx_steps" value="1. pool.connect() → get dedicated client&#xa;2. BEGIN transaction&#xa;3. Fetch cart items for session_id&#xa;4. Calculate subtotal + ₹40 shipping&#xa;5. INSERT into orders table&#xa;6. Loop: INSERT each order_item&#xa;7. UPDATE products.stock -= qty (each item)&#xa;8. DELETE cart WHERE session_id&#xa;9. COMMIT (success) or ROLLBACK (failure)&#xa;10. client.release() in finally block" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="440" y="920" width="340" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- PAGINATION FLOW -->
+        <mxCell id="pag_title" value="PAGINATION (Server-Side)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="830" y="940" width="230" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="pag_steps" value="GET /api/products?page=2&amp;limit=8&amp;search=iphone&#xa;&#xa;offset = (page-1) × limit = 8&#xa;&#xa;SELECT ... LIMIT 8 OFFSET 8&#xa;SELECT COUNT(*) → totalProducts&#xa;&#xa;Response: {&#xa;  products: [...],&#xa;  pagination: {&#xa;    currentPage: 2,&#xa;    totalPages: ceil(total/8),&#xa;    hasNextPage, hasPrevPage&#xa;  }&#xa;}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="830" y="970" width="280" height="200" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram name="HLD - Future Scope (Kafka + Microservices)" id="HLD_Future">
+    <mxGraphModel dx="1800" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2200" pageHeight="2800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- TITLE -->
+        <mxCell id="ftitle" value="AMAZON CLONE — FUTURE SCOPE HLD (Production-Grade Microservices)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="20" width="1000" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="fsubtitle" value="Scale Target: 100 Million DAU | 10 Orders/sec | Latency: ~200ms | Kafka Event Streaming | ElasticSearch | Redis | CDN" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="250" y="60" width="1100" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- CLIENTS LAYER -->
+        <mxCell id="f_clients_bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;opacity=30;" vertex="1" parent="1">
+          <mxGeometry x="30" y="110" width="200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="f_client_label" value="CLIENTS" style="text;html=1;align=center;verticalAlign=middle;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="115" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="f_web" value="Web (React)" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;align=center;aspect=fixed;imageAspect=0;image=img/lib/clip_art/computers/IBM_Tablet_128x128.png;" vertex="1" parent="1">
+          <mxGeometry x="40" y="140" width="50" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="f_mob" value="Mobile" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;align=center;aspect=fixed;imageAspect=0;image=img/lib/clip_art/telecommunication/iPhone_128x128.png;" vertex="1" parent="1">
+          <mxGeometry x="150" y="140" width="50" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- CDN -->
+        <mxCell id="f_cdn" value="CDN&#xa;(CloudFront/Vercel Edge)&#xa;Static assets, images" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="30" y="270" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="fe1" style="endArrow=classic;html=1;" edge="1" source="f_web" target="f_cdn" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- API GATEWAY (Kong/AWS API Gateway) -->
+        <mxCell id="f_apigw" value="API Gateway&#xa;(Kong / AWS API Gateway)&#xa;&#xa;• JWT Auth &amp; Rate Limiting&#xa;• Request routing to services&#xa;• SSL Termination&#xa;• Load Balancing&#xa;• Logging &amp; Monitoring" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="290" y="110" width="240" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="fe2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_cdn" target="f_apigw" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fe3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_web" target="f_apigw" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- USER SERVICE -->
+        <mxCell id="f_user_svc" value="User Service&#xa;(Node.js)&#xa;&#xa;• Register / Login&#xa;• JWT token generation&#xa;• Password hashing (bcrypt)&#xa;• Profile management&#xa;DB: MySQL (users table)&#xa;Fields: name, email, password,&#xa;phone, address" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="610" y="60" width="210" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="fe4" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_apigw" target="f_user_svc" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- SEARCH SERVICE (ElasticSearch) -->
+        <mxCell id="f_search_svc" value="Search Service&#xa;(Node.js + ElasticSearch)&#xa;&#xa;• Full-text search (Apache Lucene)&#xa;• Inverted indexing → O(1) lookup&#xa;• Fuzzy search, filters&#xa;• Populated via CDC Pipeline&#xa;• Response: Product IDs → fetch&#xa;  full details from Product DB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="610" y="290" width="210" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="fe5" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_apigw" target="f_search_svc" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- PRODUCT SERVICE -->
+        <mxCell id="f_prod_svc" value="Product Service&#xa;(Node.js)&#xa;&#xa;• Product CRUD&#xa;• Category filter&#xa;• Pagination (LIMIT/OFFSET)&#xa;• Redis Cache (product details)&#xa;• DB: PostgreSQL (products,&#xa;  categories, images in S3)&#xa;• Serves images via CDN URL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="610" y="520" width="210" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="fe6" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_apigw" target="f_prod_svc" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- CART SERVICE -->
+        <mxCell id="f_cart_svc" value="Cart Service&#xa;(Node.js)&#xa;&#xa;• Add/Remove/Update cart items&#xa;• Session-based (UUID)&#xa;• On checkout: re-validate&#xa;  prices from Product DB&#xa;• DB: PostgreSQL (cart table)&#xa;• Rate limited write ops" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="610" y="750" width="210" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="fe7" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_apigw" target="f_cart_svc" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- CHECKOUT + INVENTORY SERVICE -->
+        <mxCell id="f_checkout_svc" value="Checkout Service&#xa;(Node.js)&#xa;&#xa;• Validates cart items&#xa;• Calls Inventory Service&#xa;  to check stock availability&#xa;• Initiates payment flow&#xa;• Publishes OrderPlaced event&#xa;  → Kafka" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="610" y="980" width="210" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="fe8" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_apigw" target="f_checkout_svc" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- INVENTORY SERVICE -->
+        <mxCell id="f_inv_svc" value="Inventory Service&#xa;(Node.js)&#xa;&#xa;• Check stock before checkout&#xa;• Atomic stock decrement&#xa;  (Pessimistic Locking)&#xa;• Race condition handling&#xa;  (Flash sale support)&#xa;• DB: PostgreSQL&#xa;  Indexed on ProductID" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="850" y="980" width="210" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="fe9" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_checkout_svc" target="f_inv_svc" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- PAYMENT SERVICE -->
+        <mxCell id="f_pay_svc" value="Payment Service&#xa;(Node.js)&#xa;&#xa;• Receives payment details&#xa;• Calls Payment Gateway&#xa;  (Razorpay / Stripe)&#xa;• Stores PaymentID, status&#xa;• Publishes PaymentComplete&#xa;  event → Kafka" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="610" y="1210" width="210" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="fe10" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_checkout_svc" target="f_pay_svc" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- THIRD PARTY PAYMENT GATEWAY -->
+        <mxCell id="f_pg" value="3rd Party&#xa;Payment Gateway&#xa;(Razorpay / Stripe)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="610" y="1450" width="210" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="fe11" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_pay_svc" target="f_pg" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== KAFKA ===================== -->
+        <mxCell id="kafka_bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;opacity=50;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="700" width="340" height="600" as="geometry" />
+        </mxCell>
+        <mxCell id="kafka_title" value="APACHE KAFKA&#xa;(Distributed Event Streaming Platform)" style="text;html=1;align=center;verticalAlign=middle;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1130" y="710" width="320" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Kafka Topics -->
+        <mxCell id="kafka_t1" value="Topic: order.placed&#xa;&#xa;Producer: Checkout Service&#xa;Consumers:&#xa; • Order Consumer → Order DB&#xa; • Inventory Consumer → decrement stock&#xa; • Notification Consumer → email/SMS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1135" y="780" width="310" height="140" as="geometry" />
+        </mxCell>
+
+        <mxCell id="kafka_t2" value="Topic: payment.completed&#xa;&#xa;Producer: Payment Service&#xa;Consumers:&#xa; • Order Consumer → update order status&#xa; • Email Consumer → send receipt&#xa; • Analytics Consumer → revenue tracking" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1135" y="950" width="310" height="140" as="geometry" />
+        </mxCell>
+
+        <mxCell id="kafka_t3" value="Topic: inventory.updated&#xa;&#xa;Producer: Inventory Service&#xa;Consumers:&#xa; • ElasticSearch Consumer → update stock&#xa;   in search index&#xa; • Notification Consumer → low stock alert" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1135" y="1120" width="310" height="130" as="geometry" />
+        </mxCell>
+
+        <!-- Kafka arrows FROM services -->
+        <mxCell id="fek1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#d79b00;" edge="1" source="f_checkout_svc" target="kafka_t1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fek2" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#d79b00;" edge="1" source="f_pay_svc" target="kafka_t2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fek3" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#d79b00;" edge="1" source="f_inv_svc" target="kafka_t3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- CDC PIPELINE -->
+        <mxCell id="cdc_bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;opacity=50;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="290" width="340" height="380" as="geometry" />
+        </mxCell>
+        <mxCell id="cdc_title" value="CDC PIPELINE&#xa;(Change Data Capture)" style="text;html=1;align=center;verticalAlign=middle;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1130" y="300" width="320" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cdc_steps" value="1. Connector Service watches Product DB&#xa;   (Debezium / Kafka Connect)&#xa;&#xa;2. Any INSERT/UPDATE/DELETE in&#xa;   products table triggers a change event&#xa;&#xa;3. Change event → Kafka Streaming Buffer&#xa;   (Azure Queue / Kafka Topic)&#xa;&#xa;4. ElasticSearch Consumer reads the event&#xa;   and updates the search index in real-time&#xa;&#xa;Result: Product search always shows&#xa;latest prices, stock, descriptions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1130" y="350" width="320" height="290" as="geometry" />
+        </mxCell>
+        <mxCell id="fecdc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#9673a6;" edge="1" source="f_prod_svc" target="cdc_bg" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- DATABASES -->
+        <mxCell id="fdb_title" value="DATABASE LAYER" style="text;html=1;align=center;verticalAlign=middle;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1530" y="60" width="220" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f_user_db" value="User DB&#xa;(MySQL)&#xa;id, name, email,&#xa;password, phone, address" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1530" y="100" width="180" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="fedb1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_user_svc" target="f_user_db" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f_es_db" value="ElasticSearch Index&#xa;(Search Engine)&#xa;Inverted index on product names,&#xa;descriptions, categories&#xa;O(1) lookup via inverted index" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1530" y="310" width="180" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="fedb2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_search_svc" target="f_es_db" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f_prod_db" value="Product DB&#xa;(PostgreSQL)&#xa;id, name, desc, price, stock,&#xa;category_id, images TEXT[],&#xa;rating, review_count,&#xa;specifications JSONB" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1530" y="540" width="180" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="fedb3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_prod_svc" target="f_prod_db" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f_cart_db" value="Cart DB&#xa;(PostgreSQL)&#xa;id, session_id, product_id,&#xa;quantity&#xa;UNIQUE(session_id, product_id)" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1530" y="780" width="180" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="fedb4" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_cart_svc" target="f_cart_db" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f_inv_db" value="Inventory DB&#xa;(PostgreSQL)&#xa;product_id (Indexed),&#xa;available_qty, reserved_qty,&#xa;warehouse_id" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1530" y="1000" width="180" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="fedb5" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_inv_svc" target="f_inv_db" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f_order_db" value="Order DB&#xa;(MySQL/PostgreSQL)&#xa;orders: id UUID, user_id,&#xa;products, price, payment_id&#xa;&#xa;order_items: order_id,&#xa;product_id, qty, price&#xa;&#xa;Schema: OrderID, UserID,&#xa;Products, Price, PaymentID" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1530" y="1230" width="180" height="160" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f_pay_db" value="Payment DB&#xa;(MySQL)&#xa;payment_id, order_id,&#xa;user_id, amount, method,&#xa;status (SUCCESS/FAIL),&#xa;gateway_ref" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1530" y="1430" width="180" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="fedb6" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_pay_svc" target="f_pay_db" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- REDIS CACHE -->
+        <mxCell id="f_redis" value="Redis Cache&#xa;&#xa;• Product details (TTL: 5 min)&#xa;• User sessions&#xa;• Cart data (fast reads)&#xa;• Rate limit counters" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="60" width="220" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="fer1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_prod_svc" target="f_redis" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fer2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_cart_svc" target="f_redis" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- AWS S3 -->
+        <mxCell id="f_s3" value="AWS S3&#xa;(Blob Storage)&#xa;&#xa;Product images&#xa;Served via CloudFront CDN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="200" width="220" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="fes3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_prod_svc" target="f_s3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- NOTIFICATION SERVICE -->
+        <mxCell id="f_notif" value="Notification Service&#xa;&#xa;Kafka Consumer&#xa;Topics: order.placed, payment.completed&#xa;&#xa;• Email (SendGrid / SES)&#xa;• SMS (Twilio)&#xa;• Push Notification&#xa;• Order confirmation receipts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="850" y="1350" width="240" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="fenot" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="kafka_t1" target="f_notif" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fenot2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="kafka_t2" target="f_notif" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ANALYTICS SERVICE -->
+        <mxCell id="f_analytics" value="Analytics Service&#xa;&#xa;Kafka Consumer&#xa;Topic: payment.completed&#xa;&#xa;• Revenue tracking&#xa;• Product popularity&#xa;• User behavior analysis&#xa;• Real-time dashboards" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="1350" width="240" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="feana" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="kafka_t2" target="f_analytics" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ORDER STATUS SERVICE -->
+        <mxCell id="f_ordstatus" value="Order Status Service&#xa;&#xa;Kafka Consumer&#xa;Topics: order.placed, payment.completed&#xa;&#xa;• Update order status in DB&#xa;  (placed → processing → delivered)&#xa;• Exposes: GET /api/orders/:id" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="610" y="1450" width="210" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="feos1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="kafka_t1" target="f_ordstatus" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="feos2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="kafka_t2" target="f_ordstatus" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="feos3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="f_ordstatus" target="f_order_db" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- WHY KAFKA BOX -->
+        <mxCell id="why_kafka" value="WHY KAFKA?&#xa;&#xa;Problem: Checkout needs 3 separate API calls:&#xa;  1. Check inventory&#xa;  2. Make payment&#xa;  3. Update stock + create order&#xa;&#xa;If any step fails → inconsistency!&#xa;  (e.g., payment done but stock not decremented)&#xa;&#xa;Kafka Solution:&#xa;  • Checkout publishes OrderPlaced event&#xa;  • Order Consumer → creates order record&#xa;  • Inventory Consumer → decrements stock&#xa;  • Each consumer retries independently&#xa;  • Guaranteed at-least-once delivery&#xa;  • No data loss even if a service is down" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="30" y="700" width="350" height="360" as="geometry" />
+        </mxCell>
+
+        <!-- CONSISTENCY vs AVAILABILITY NOTE -->
+        <mxCell id="cap_note" value="CAP THEOREM DECISIONS&#xa;&#xa;Product Search → HIGH AVAILABILITY&#xa;  (slight stale data OK, use ElasticSearch)&#xa;&#xa;Payment &amp; Order Placement → HIGH CONSISTENCY&#xa;  (DB transactions, Kafka guarantees)&#xa;&#xa;Inventory → HIGH CONSISTENCY&#xa;  (Pessimistic locking prevents overselling)&#xa;&#xa;Cart → AVAILABILITY&#xa;  (session-based, eventual consistency OK)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="30" y="1100" width="350" height="250" as="geometry" />
+        </mxCell>
+
+        <!-- NFR BOX -->
+        <mxCell id="nfr_note" value="NON-FUNCTIONAL REQUIREMENTS MET&#xa;&#xa;• Scale: 100M DAU, 10 orders/sec&#xa;  → Horizontal scaling of each microservice&#xa;  → Kafka handles 10M+ events/sec&#xa;&#xa;• Latency: ~200ms&#xa;  → Redis cache for product reads&#xa;  → CDN for static assets&#xa;  → ElasticSearch for fast search&#xa;&#xa;• Availability (Search): ElasticSearch cluster&#xa;  with replicas&#xa;&#xa;• Consistency (Orders): DB transactions +&#xa;  Kafka consumer idempotency&#xa;&#xa;• Fault Tolerance: Kafka retries,&#xa;  circuit breakers between services" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="30" y="1390" width="350" height="320" as="geometry" />
+        </mxCell>
+
+        <!-- Horizontal separator labels -->
+        <mxCell id="layer1" value="— CLIENT LAYER —" style="text;html=1;align=center;fontStyle=1;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="30" y="90" width="200" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="layer2" value="— GATEWAY &amp; SERVICES LAYER —" style="text;html=1;align=center;fontStyle=1;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="280" y="90" width="560" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="layer3" value="— MESSAGING / EVENT LAYER —" style="text;html=1;align=center;fontStyle=1;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1110" y="680" width="360" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="layer4" value="— DATABASE LAYER —" style="text;html=1;align=center;fontStyle=1;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1520" y="60" width="220" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
